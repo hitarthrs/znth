@@ -1,0 +1,33 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+// prisma/schema.prisma
+datasource db {
+  provider = "postgres" // Changed from "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DATABASE_URL") // <-- ADD THIS LINE
+}
+
+// === Our First Database Model ===
+model Goal {
+  id          String   @id @default(cuid()) // A unique ID for each goal
+  title       String
+  description String?  // The '?' makes this field optional
+  level       String   // e.g., "LIFE", "DECADE", "YEAR", "MONTH", "DAY"
+  status      String   @default("not_started") // e.g., "not_started", "in_progress", "complete"
+  
+  parentId    String?  // The ID of the parent goal (optional)
+  parent      Goal?    @relation("GoalHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Goal[]   @relation("GoalHierarchy")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
